@@ -1,7 +1,7 @@
 import Component from '../Component.js';
 import Header from './Header.js';
 import Type from './Type.js';
-import { getCharacter, getCharacterFromApi, getMBTI } from '../../services/quiz-api.js';
+import { getAllCharacters, getCharacterFromApi, getMBTI } from '../../services/quiz-api.js';
 
 class StatsApp extends Component {
 
@@ -9,7 +9,7 @@ class StatsApp extends Component {
         const header = new Header();
         dom.prepend(header.renderDOM());
 
-        getCharacter().then(result => {
+        getAllCharacters().then(result => {
 
             result.forEach(char => {
 
@@ -17,12 +17,12 @@ class StatsApp extends Component {
 
                 getCharacterFromApi(char.name)
                     .then(result => {
-                        typeProps.image = result.results[0].image;
-                        typeProps.status = result.results[0].status;
-                        typeProps.species = result.results[0].species;
-                        typeProps.gender = result.results[0].gender;
-                        typeProps.origin = result.results[0].origin.name;
-
+                        const info = result.results[0];
+                        typeProps.image = info.image;
+                        typeProps.status = info.status;
+                        typeProps.species = info.species;
+                        typeProps.gender = info.gender;
+                        typeProps.origin = info.origin.name;
                         typeProps.name = char.name;
                         typeProps.quote = char.quote;
                         typeProps.personality = char.mbti;
@@ -30,7 +30,6 @@ class StatsApp extends Component {
                         getMBTI(char.mbti)
                             .then(result => {
                                 typeProps.description = result[0].description;
-
                             })
                             .then(() => {
                                 const type = new Type(typeProps);

@@ -21,11 +21,7 @@ class AboutApp extends Component {
         <div id="root">
             <div id="about-container">
                 <h2>Meet The Developers</h2>
-                
-                <div id="about-card-container">
-
-
-                </div>
+                <div id="about-card-container"></div>
             </div>
             <audio controls autoplay>
                 <source src="../../../assets/sound/humanmusic.mp3">

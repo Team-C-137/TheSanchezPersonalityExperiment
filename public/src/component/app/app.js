@@ -18,36 +18,35 @@ class App extends Component {
             questions: [],
             answers: [],
             selectAnswer: mbti => {
-                answer = `${mbti},`;
+                answer = `${mbti},`; // WAT? why a comma?
             }
         });
+
         dom.querySelector('#quiz-box').appendChild(quizApp.renderDOM());
 
-
         //button event listeners
-
         const backButton = dom.querySelector('#back-button');
         const forwardButton = dom.querySelector('#forward-button');
 
         forwardButton.addEventListener('click', () => {
-            if(questionNumber === 21) {
+            // where can you get this value from instead of hard-coding?
+            // at a minimum, create a "const QUESTION_COUNT = 21;" at top of module
+            if(questionNumber === 21) { 
                 endGame();
-            } else {
-                if(answer) {
-                    updateGame({ userAnswer: answer, id: gameId });
-                    updateQuiz(parseInt(questionOrder[questionNumber]));
-                    questionNumber++;
-                    answer = '';
-                }
+            } else if(answer) {
+                updateGame({ userAnswer: answer, id: gameId });
+                updateQuiz(parseInt(questionOrder[questionNumber]));
+                questionNumber++;
+                answer = '';
             }
         });
 
         backButton.addEventListener('click', () => {
-            if(questionNumber > 1) {
-                backOne({ id: gameId, method: 'back' }).then(result => {
-                    resumeGame(result);
-                });
-            }
+            if(questionNumber < 2) return;
+           
+            backOne({ id: gameId, method: 'back' }).then(result => {
+                resumeGame(result);
+            });
         });
 
         // check if current user has an unfinished game and resume it
@@ -56,13 +55,19 @@ class App extends Component {
         getGames()
             .then(data => {
                 if(data) {
+                    // app shouldn't have to do this work. 
+                    // make the server return what the app needs
                     const lastGame = data.find(game => {
                         return game.is_complete === false;
                     });
-                    lastGame ? resumeGame(lastGame) : newGame();
-                } else {
-                    newGame();
-                }
+                    
+                    if(lastGame) {
+                        resumeGame(lastGame);
+                        return;
+                    }
+                } 
+
+                newGame();
             }).catch(err => {
                 console.log(err);
             });
@@ -71,7 +76,7 @@ class App extends Component {
         function newGame() {
             const quizOrder = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21];
             shuffle(quizOrder);
-            return createGame({ order: quizOrder.join(',') })
+            return createGame({ order: quizOrder.join(',') }) // just pass the array, joining to string is silly
                 .then(result => {
                     const questionID = result.question_order.split(',');
                     updateQuiz(parseInt(questionID[0]));
@@ -81,8 +86,11 @@ class App extends Component {
         }
 
         function updateQuiz(id) {
+
             let quizProps = {};
 
+            // your server should be join the question and answer tables and
+            // returning single response!
             getQuestion(id)
                 .then(data => {
                     quizProps.questionHeader = `Question ${questionNumber} of 21`;

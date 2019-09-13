@@ -5,7 +5,8 @@ class QuizApp extends Component {
     onRender(dom) {
         const selectAnswer = this.props.selectAnswer;
         const inputs = dom.querySelectorAll('input');
-        [...inputs].forEach(input => {
+        // not necessary. DOMList has a forEach method
+        inputs.forEach(input => {
             input.addEventListener('click', () => {
                 selectAnswer(input.value);
             });

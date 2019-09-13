@@ -9,6 +9,7 @@ if (!userToken && location.pathname !== '/auth.html') {
     searchParams.set('redirect', location.pathname);
     location = `auth.html?${searchParams.toString()}`;
 }
+
 function fetchWithError(url, options) {
     if (userToken) {
         options = options || {};
@@ -105,15 +106,15 @@ export function getCharacterFromApi(name) {
         .then(response => response.json());
 }
 
+// don't make functions do double-duty, these are different methods, different routes, different data!
 export function getCharacter(mbti) {
-    if (mbti) {
-        const url = `${URL}/characters/${mbti}`;
-        return fetchWithError(url);
-    }
-    else {
-        const url = 'data/characters';
-        return fetchWithError(url);
-    }
+    const url = `${URL}/characters/${mbti}`;
+    return fetchWithError(url);
+}
+
+export function getAllCharacters() {   
+    const url = 'data/characters';
+    return fetchWithError(url);
 }
 
 //copy paste from Marty
