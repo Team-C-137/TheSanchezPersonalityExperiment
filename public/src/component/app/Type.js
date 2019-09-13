@@ -9,17 +9,16 @@ class Type extends Component {
         div.addEventListener('mouseover', () => {
             desc.classList.remove('hidden');
         });
+
         div.addEventListener('mouseout', () => {
             desc.classList.add('hidden');
         });
-
-
     }
     renderHTML() {
         const props = this.props;
         return /*html*/`
-        <div id = "top-div">
-            <div class="type">
+            <div id = "top-div">
+                <div class="type">
                     <span>${props.name}</span>
                     <img
                         src="${props.image}"
@@ -33,7 +32,7 @@ class Type extends Component {
                         <li>Origin: ${props.origin}</li>
                     </ul>
                 </div>
-                </div>
+            </div>
         `;
     }
 }

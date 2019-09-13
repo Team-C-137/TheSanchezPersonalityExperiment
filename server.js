@@ -17,7 +17,7 @@ const authRoutes = createAuthRoutes({
             FROM users
             WHERE email = $1;
         `,
-            [email]
+        [email]
         ).then(result => result.rows[0]);
     },
     insertUser(user, hash) {
@@ -26,7 +26,7 @@ const authRoutes = createAuthRoutes({
             VALUES ($1, $2, $3)
             RETURNING id, email, display_name as "displayName";
         `,
-            [user.email, hash, user.displayName]
+        [user.email, hash, user.displayName]
         ).then(result => result.rows[0]);
     }
 });
@@ -43,9 +43,10 @@ app.use('/api', ensureAuth);
 
 //AUTH ROUTES
 
-app.get('/data/game', (req, res) => {
+// plural routes, "data" prefix is meaningless
+app.get('/api/games', (req, res) => {
     client.query(`
-    SELECT * FROM game WHERE is_complete = $1;
+        SELECT * FROM game WHERE is_complete = $1;
     `, [true])
         .then(result => {
             res.json(result.rows);
@@ -63,7 +64,7 @@ app.get('/api/mbti/:name', (req, res) => {
         SELECT * FROM mbti WHERE name = $1;
     `, [name])
         .then(result => {
-            res.json(result.rows);
+            res.json(result.rows[0]); // only one thing: return object, not array
         })
         .catch(err => {
             res.status(500).json({
@@ -72,7 +73,7 @@ app.get('/api/mbti/:name', (req, res) => {
         });
 });
 
-
+// is this used?
 app.get('/api/test', (req, res) => {
     client.query(`
         SELECT * FROM test;
@@ -101,13 +102,12 @@ app.get('/api/answers', (req, res) => {
         });
 });
 
-app.get('/api/game', (req, res) => {
+app.get('/api/me/game', (req, res) => {
     client.query(`
         SELECT * FROM game WHERE users_id = $1;
     `, [req.userId])
         .then(result => {
-            console.log(result.rows);
-            res.json(result.rows);
+            res.json(result.rows[0]);
         })
         .catch(err => {
             res.status(500).json({
@@ -116,13 +116,19 @@ app.get('/api/game', (req, res) => {
         });
 });
 
-app.put('/api/game/:id', (req, res) => {
+// This route needs serious help, I would think that either:
+// - Update needs to be consolidated
+// - If it is multipurpose, then split into different routes.
+app.put('/api/games/:id', (req, res) => {
     const data = req.body;
     const id = req.params.id;
-    if (data.isComplete) {
+    if(data.isComplete) {
         client.query(`
-        UPDATE game SET is_complete = $1 WHERE id = $2;
-        `, [data.isComplete, id]
+            UPDATE game 
+            SET is_complete = $1 
+            WHERE id = $2
+            AND user_id = $3; -- limit to authed user
+        `, [data.isComplete, id, req.userId]
         )
             .then(() => {
                 res.status(204).send();
@@ -133,11 +139,14 @@ app.put('/api/game/:id', (req, res) => {
                 });
             });
     }
-    if (data.userAnswer) {
+    if(data.userAnswer) {
         client.query(`
-        UPDATE game SET user_answer = CONCAT(user_answer, $1::text) WHERE id = $2;
+            UPDATE game 
+            SET user_answer = CONCAT(user_answer, $1::text) -- data model smell, why concat?
+            WHERE id = $2; -- need to limit to authed user
         `, [data.userAnswer, id])
             .then(result => {
+                // what exactly are you returning?
                 res.json(result.rows[0]);
             })
             .catch(err => {
@@ -146,7 +155,7 @@ app.put('/api/game/:id', (req, res) => {
                 });
             });
     }
-    if (data.method === 'back') {
+    if(data.method === 'back') {
         client.query(`
         UPDATE game SET user_answer = SUBSTR(user_answer, 1, LENGTH(user_answer)-5) 
         WHERE id = $1
@@ -161,7 +170,7 @@ app.put('/api/game/:id', (req, res) => {
                 });
             });
     }
-    if (data.method === 'char') {
+    if(data.method === 'char') {
         client.query(`
         UPDATE game SET result = $2
         WHERE id = $1
@@ -195,8 +204,7 @@ app.post('/api/game', (req, res) => {
 });
 
 app.get('/data/characters/', (req, res) => {
-    client.query(`SELECT * FROM characters
-        `,)
+    client.query(`SELECT * FROM characters`)
         .then(result => {
             res.json(result.rows);
         })
@@ -216,7 +224,7 @@ app.get('/api/characters/:mbti', (req, res) => {
     `, [mbti])
         .then(result => {
             const character = result.rows[0];
-            if (!character) {
+            if(!character) {
                 res.status(404).json({
                     error: `character mbti ${mbti} does not exist`
                 });

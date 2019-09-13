@@ -1,6 +1,9 @@
 import Component from '../Component.js';
 
+// this won't work here...
 const props = this.props;
+
+// hmm, I don't think this file is used at all. if so, delete!
 
 class QuizResult extends Component {
     renderHTML(){

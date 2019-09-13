@@ -4,10 +4,8 @@ class ProfileResults extends Component {
     renderHTML() {
         return /*html*/`
             <div id="previous-results">
-
-                    bar graph here
-
-                </div>
+                bar graph here
+            </div>
         `;
     }
 }
