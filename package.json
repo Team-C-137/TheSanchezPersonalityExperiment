@@ -35,7 +35,7 @@
   "homepage": "https://github.com/Team-C-137/TheSanchezPersonalityExperiment#readme",
   "dependencies": {
     "bcryptjs": "^2.4.3",
-    "chart.js": "^2.8.0",
+    "chart.js": "^2.9.4",
     "cors": "^2.8.5",
     "dotenv": "^8.1.0",
     "esm": "^3.2.25",
